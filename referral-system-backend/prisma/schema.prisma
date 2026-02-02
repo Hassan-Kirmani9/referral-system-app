@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id        String             @id @default(uuid())
+  name      String
+  type      OrganizationType
+  role      OrganizationRole
+  contact   Json
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  coverageAreas     CoverageArea[]
+  sentReferrals     Referral[]     @relation("SenderOrganization")
+  receivedReferrals Referral[]     @relation("ReceiverOrganization")  
+
+  @@map("organizations")
+}
+
+model CoverageArea {
+  id             String       @id @default(uuid())
+  organizationId String
+  state          String
+  county         String?
+  city           String?
+  zipCode        String       
+  createdAt      DateTime     @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("coverage_areas")
+  @@index([organizationId])  
+}
+
+model Referral {
+  id              String         @id @default(uuid())
+  patientName     String
+  insuranceNumber String
+  status          ReferralStatus @default(PENDING)
+  notes           String?
+  senderOrgId     String
+  receiverOrgId   String         
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  
+  senderOrg   Organization @relation("SenderOrganization", fields: [senderOrgId], references: [id])
+  receiverOrg Organization @relation("ReceiverOrganization", fields: [receiverOrgId], references: [id])  
+
+  @@map("referrals")
+  @@index([senderOrgId])
+  @@index([receiverOrgId])  
+}
+
+enum OrganizationType {
+  CLINIC
+  PHARMACY
+  HOME_HEALTH
+  NURSING_HOME
+  TRANSPORTATION
+  DME
+}
+
+enum OrganizationRole {
+  SENDER
+  RECEIVER
+  BOTH
+}
+
+enum ReferralStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+}

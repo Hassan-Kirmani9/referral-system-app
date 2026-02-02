@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_1 = require("../middleware/auth");
+const organizationController_1 = require("../controllers/organizationController");
+const router = (0, express_1.Router)();
+router.post("/", auth_1.authenticate, organizationController_1.createOrganization);
+router.get("/", auth_1.authenticate, organizationController_1.getOrganizations);
+router.get("/:id", auth_1.authenticate, organizationController_1.getOrganizationById);
+router.put("/:id/coverage", auth_1.authenticate, organizationController_1.updateCoverageAreas);
+router.patch("/:id", auth_1.authenticate, organizationController_1.updateOrganization);
+router.delete("/:id", auth_1.authenticate, organizationController_1.deleteOrganization);
+exports.default = router;
