@@ -22,14 +22,7 @@ export const createOrganization = asyncHandler(
 
 export const getOrganizations = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const page = parseInt(req.query.page as string)
-    const limit = 10
-    const totalCount = await prisma.organization.count()
-    const totalPages =  Math.ceil(totalCount/limit)
-    const skip = (page - 1) * totalCount 
     const organizations = await prisma.organization.findMany({
-      take: limit,
-      skip,
       include: {
         coverageAreas: true,
       },
@@ -43,13 +36,6 @@ export const getOrganizations = asyncHandler(
       message: "Organizations fetched successfully",
       data: organizations,
       count: organizations.length,
-      pagination:{
-        currentPage : page,
-        totalPages,
-        totalCount,
-        limit,
-        skip
-      }
     });
   },
 );
